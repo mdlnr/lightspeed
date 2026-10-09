@@ -144,3 +144,10 @@ release boundary with `scripts/release/verify-metadata.sh`.
 - Add or update tests for behavioral changes. For deterministic engine changes,
   include replay coverage or vectors where appropriate.
 - When asked for repository line counts, use `cloc $(git ls-files)`.
+
+## Cursor Cloud specific instructions
+
+- `./dev.sh` is the full local product. The UI is `http://localhost:5173/app/` (Vite binds `localhost`, so `127.0.0.1` will not connect). Sign in as `admin@lightspeed.dev` / `lightspeed-dev-password`. The full profile seeds a Test universe plus operator, contributor, and viewer accounts with the same initial password.
+- Node.js 24 is required. This image also has Node 22 at `/exec-daemon/node`, which is ahead of `/usr/local/bin` on `PATH`. The environment links Node 24.13.0 into `/usr/local/cargo/bin` so `node` resolves to 24. `./dev.sh` exits on anything older.
+- There is no systemd. Boot starts `dockerd` with the `fuse-overlayfs` driver. `iptables` must stay on the legacy backend before `dockerd` starts; the nft backend drops container-to-container traffic and the MinIO bucket setup never finishes. `nc` comes from `netcat-openbsd` because infrastructure readiness uses `nc -z`.
+- Install prebuilds `temporal-server` and `environment-daemon` with `CARGO_BUILD_JOBS=2`. A fully parallel Rust compile exhausts the memory available on this VM.
